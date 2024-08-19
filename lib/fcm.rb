@@ -209,7 +209,8 @@ class FCM
     headers = {
       "Authorization" => "Bearer #{jwt_token}",
       "Content-Type" => "application/json",
-      "project_id" => @project_name
+      "project_id" => @project_name,
+      "access_token_auth" => true
     }
 
     response = if method == :get
