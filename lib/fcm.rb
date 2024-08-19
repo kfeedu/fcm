@@ -88,66 +88,46 @@ class FCM
   alias send send_notification
 
   def create_notification_key(key_name, project_id, registration_ids = [])
-    post_body = build_post_body(registration_ids, operation: "create",
-                                                  notification_key_name: key_name)
-
-    extra_headers = {
-      "project_id" => project_id,
+    post_body = {
+      operation: "create",
+      notification_key_name: key_name,
+      registration_ids: registration_ids
     }
 
-    for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
-      build_response(response)
-    end
+    send_request("/fcm/notification", post_body)
   end
 
   alias create create_notification_key
 
   def add_registration_ids(key_name, project_id, notification_key, registration_ids)
-    post_body = build_post_body(registration_ids, operation: "add",
-                                                  notification_key_name: key_name,
-                                                  notification_key: notification_key)
-
-    extra_headers = {
-      "project_id" => project_id,
+    post_body = {
+      operation: "add",
+      notification_key_name: key_name,
+      notification_key: notification_key,
+      registration_ids: registration_ids
     }
 
-    for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
-      build_response(response)
-    end
+    send_request("/fcm/notification", post_body)
   end
 
   alias add add_registration_ids
 
   def remove_registration_ids(key_name, project_id, notification_key, registration_ids)
-    post_body = build_post_body(registration_ids, operation: "remove",
-                                                  notification_key_name: key_name,
-                                                  notification_key: notification_key)
-
-    extra_headers = {
-      "project_id" => project_id,
+    post_body = {
+      operation: "remove",
+      notification_key_name: key_name,
+      notification_key: notification_key,
+      registration_ids: registration_ids
     }
 
-    for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
-      build_response(response)
-    end
+    send_request("/fcm/notification", post_body)
   end
 
   alias remove remove_registration_ids
 
   def recover_notification_key(key_name, project_id)
     params = { notification_key_name: key_name }
-
-    extra_headers = {
-      "project_id" => project_id,
-    }
-
-    for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.get("/gcm/notification", params)
-      build_response(response)
-    end
+    send_request("/fcm/notification", nil, :get, params)
   end
 
   def send_with_notification_key(notification_key, options = {})
@@ -218,6 +198,28 @@ class FCM
   end
 
   private
+
+  def send_request(path, body = nil, method = :post, params = nil)
+    connection = Faraday.new(url: BASE_URI) do |faraday|
+      faraday.request :json
+      faraday.response :json
+      faraday.adapter Faraday.default_adapter
+    end
+
+    headers = {
+      "Authorization" => "Bearer #{jwt_token}",
+      "Content-Type" => "application/json",
+      "project_id" => @project_name
+    }
+
+    response = if method == :get
+                 connection.get(path, params, headers)
+               else
+                 connection.post(path, body.to_json, headers)
+               end
+
+    build_response(response)
+  end
 
   def for_uri(uri, extra_headers = {})
     connection = ::Faraday.new(
