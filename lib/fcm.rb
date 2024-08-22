@@ -8,7 +8,7 @@ class FCM
   BASE_URI_V1 = "https://fcm.googleapis.com/v1/projects/"
   DEFAULT_TIMEOUT = 30
 
-  GROUP_NOTIFICATION_BASE_URI = "https://android.googleapis.com"
+  GROUP_NOTIFICATION_BASE_URI = "https://fcm.googleapis.com"
   INSTANCE_ID_API = "https://iid.googleapis.com"
   TOPIC_REGEX = /[a-zA-Z0-9\-_.~%]+/
 
@@ -226,7 +226,8 @@ class FCM
     ) do |faraday|
       faraday.adapter Faraday.default_adapter
       faraday.headers["Content-Type"] = "application/json"
-      faraday.headers['Authorization'] = "key=#{@api_key}"
+      faraday.headers['Authorization'] = "Bearer #{jwt_token}"
+      faraday.headers['access_token_auth'] = 'true'
       extra_headers.each do |key, value|
         faraday.headers[key] = value
       end
