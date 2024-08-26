@@ -243,6 +243,10 @@ class FCM
   def build_response(response, registration_ids = [])
     body = response.body || {}
     response_hash = { body: body, headers: response.headers, status_code: response.status }
+    @logger = Logger.new("#{Rails.root}/log/fcm.log")
+    @logger.info { response.status.inspect.to_s }
+    @logger.info { response.body.inspect.to_s }
+
     case response.status
     when 200
       response_hash[:response] = "success"
