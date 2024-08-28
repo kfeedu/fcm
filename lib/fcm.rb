@@ -96,7 +96,7 @@ class FCM
     }
 
     for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
+      response = connection.post("/fcm/notification", post_body.to_json)
       build_response(response)
     end
   end
@@ -113,7 +113,7 @@ class FCM
     }
 
     for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
+      response = connection.post("/fcm/notification", post_body.to_json)
       build_response(response)
     end
   end
@@ -130,7 +130,7 @@ class FCM
     }
 
     for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.post("/gcm/notification", post_body.to_json)
+      response = connection.post("/fcm/notification", post_body.to_json)
       build_response(response)
     end
   end
@@ -145,7 +145,7 @@ class FCM
     }
 
     for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
-      response = connection.get("/gcm/notification", params)
+      response = connection.get("/fcm/notification", params)
       build_response(response)
     end
   end
