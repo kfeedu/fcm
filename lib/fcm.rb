@@ -17,6 +17,7 @@ class FCM
     @client_options = client_options
     @json_key_path = json_key_path
     @project_name = project_name
+    @logger = Logger.new("#{Rails.root}/log/fcm.log")
   end
 
   # See https://firebase.google.com/docs/cloud-messaging/send-message
@@ -107,13 +108,16 @@ class FCM
     post_body = build_post_body(registration_ids, operation: "add",
                                                   notification_key_name: key_name,
                                                   notification_key: notification_key)
-
+    @logger.info { "add registration id"}
+    @logger.info { post_body.inspect }
     extra_headers = {
       "project_id" => project_id,
     }
 
     for_uri(GROUP_NOTIFICATION_BASE_URI, extra_headers) do |connection|
       response = connection.post("/fcm/notification", post_body.to_json)
+      @logger.info { response.inspect.to_s }
+
       build_response(response)
     end
   end
@@ -243,9 +247,6 @@ class FCM
   def build_response(response, registration_ids = [])
     body = response.body || {}
     response_hash = { body: body, headers: response.headers, status_code: response.status }
-    @logger = Logger.new("#{Rails.root}/log/fcm.log")
-    @logger.info { response.status.inspect.to_s }
-    @logger.info { response.body.inspect.to_s }
 
     case response.status
     when 200
@@ -257,6 +258,8 @@ class FCM
       response_hash[:response] = "Only applies for JSON requests. Indicates that the request could not be parsed as JSON, or it contained invalid fields."
     when 401
       response_hash[:response] = "There was an error authenticating the sender account."
+    when 404
+      response_hash[:response] = "Something went wrong, not found."
     when 503
       response_hash[:response] = "Server is temporarily unavailable."
     when 500..599
